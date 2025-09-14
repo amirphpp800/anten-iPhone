@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="fa">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ساخت پروفایل تنظیمات iOS</title>
+    <style>
+        body {
+            font-family: 'Roboto', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+            background: #0f141a; /* softer, deeper dark */
+            min-height: 100vh;
+            color: #e6edf3; /* refined light text */
+            margin: 0;
+            padding: 28px 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 0 22px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 28px;
+            color: #f3f6fa;
+            font-weight: 600;
+            font-size: 2rem;
+            letter-spacing: 0.3px;
+        }
+
+        /* Neumorphism cards */
+        .main-card {
+            background: #111821;
+            border-radius: 20px;
+            box-shadow: 12px 12px 24px #0a0e13,
+                -12px -12px 24px #151d27;
+            border: 1px solid rgba(255,255,255,0.04);
+            padding: 28px;
+            margin-bottom: 26px;
+        }
+
+        .info-card {
+            background: #111821;
+            border-radius: 20px;
+            box-shadow: 12px 12px 24px #0a0e13,
+                -12px -12px 24px #151d27;
+            border: 1px solid rgba(255,255,255,0.04);
+            padding: 24px;
+        }
+
+        label {
+            font-weight: 600;
+            color: #d7dee7;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-select {
+            border: none;
+            border-radius: 14px;
+            padding: 14px 42px 14px 16px; /* more space for custom arrow */
+            font-size: 16px;
+            background: #111821;
+            color: #e6edf3;
+            box-shadow: inset 6px 6px 12px #0a0e13,
+                inset -6px -6px 12px #151d27;
+            transition: box-shadow 0.2s ease, transform 0.1s ease, border-color 0.2s ease;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url('data:image/svg+xml;utf8,<svg fill="%23cfd8e3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: calc(100% - 14px) center;
+            background-size: 18px 18px;
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .form-select:focus {
+            outline: none;
+            box-shadow: inset 4px 4px 8px #0a0e13,
+                inset -4px -4px 8px #151d27;
+            transform: translateY(-1px);
+            border-color: rgba(255,255,255,0.08);
+        }
+
+        .form-text {
+            color: #9aa6b2;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        /* Neumorphism button */
+        .btn-primary {
+            background: #111821;
+            color: #e6edf3;
+            border: 1px solid rgba(255,255,255,0.04);
+            border-radius: 14px;
+            padding: 14px 20px;
+            font-size: 16px;
+            font-weight: 600;
+            box-shadow: 8px 8px 16px #0a0e13,
+                -8px -8px 16px #151d27;
+            transition: box-shadow 0.2s ease, transform 0.1s ease, border-color 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 6px 6px 12px #0a0e13,
+                -6px -6px 12px #151d27;
+            border-color: rgba(255,255,255,0.08);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+            box-shadow: inset 6px 6px 12px #0a0e13,
+                inset -6px -6px 12px #151d27;
+        }
+
+        .btn-outline-info {
+            display: inline-block;
+            border: none;
+            color: #e5e7eb;
+            background: #1f2530;
+            border-radius: 999px;
+            padding: 8px 18px;
+            font-size: 14px;
+            text-decoration: none;
+            box-shadow: 4px 4px 8px #151a22,
+                -4px -4px 8px #293141;
+            transition: box-shadow 0.2s ease, transform 0.1s ease;
+        }
+
+        .btn-outline-info:hover {
+            transform: translateY(-1px);
+            box-shadow: 4px 4px 8px #151a22,
+                -4px -4px 8px #293141;
+        }
+
+        .info-section h4 {
+            color: #e6edf3;
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .info-section p {
+            color: #c2c9d4;
+            line-height: 1.75;
+            margin-bottom: 16px;
+        }
+
+        /* Softer accent colors */
+        .carrier {
+            color: #ef9a9a;
+        }
+
+        .apn {
+            color: #ffd180;
+        }
+
+        .proxy {
+            color: #a5d6a7;
+        }
+
+        .dns {
+            color: #90caf9;
+        }
+
+        /* Minimal utilities (Bootstrap-free) */
+        .w-100 {
+            width: 100%;
+        }
+
+        .mb-4 {
+            margin-bottom: 1.5rem;
+        }
+
+        /* Button base reset to ensure consistent pointer + accessibility */
+        .btn {
+            cursor: pointer;
+        }
+
+        @media only screen and (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            label {
+                font-size: 14px;
+            }
+
+            input,
+            select,
+            textarea {
+                font-size: 14px;
+            }
+
+            button {
+                font-size: 14px;
+            }
+        }
+    </style>
+    <style>
+        :root {
+            --bg: #000000; /* pure black */
+            --text: #ffffff; /* pure white */
+            --muted: #bfbfbf; /* neutral gray for helper text */
+            --card: rgba(255,255,255,0.06); /* glass layer */
+            --border: rgba(255,255,255,0.22);
+            --shadow: 0 10px 28px rgba(0, 0, 0, 0.6);
+            --glass-blur: saturate(160%) blur(14px);
+            --primary: #ffffff; /* monochrome */
+        }
+
+        html, body {
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        body {
+            font-family: 'Vazirmatn', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+            padding: 40px 0;
+            line-height: 1.85;
+        }
+
+        h1 {
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 28px;
+            letter-spacing: -0.2px;
+            margin-bottom: 24px;
+        }
+
+        .main-card,
+        .info-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            -webkit-backdrop-filter: var(--glass-blur);
+            backdrop-filter: var(--glass-blur);
+        }
+
+        .main-card { padding: 24px; margin-bottom: 20px; }
+        .info-card { padding: 20px; }
+
+        label {
+            color: #ffffff;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .form-select {
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px 20px; /* taller touch area */
+            font-size: 19px; /* larger text */
+            min-height: 56px; /* ensure height even if fonts vary */
+            width: 100%; /* make it longer horizontally */
+            background: #000000;
+            color: var(--text);
+            box-shadow: none;
+            appearance: auto;
+            -webkit-appearance: auto;
+            -moz-appearance: auto;
+            background-image: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.05s ease;
+        }
+
+        .form-select option {
+            background: #000000;
+            color: #ffffff;
+            font-size: 16px;
+        }
+
+        /* Compact control size for better alignment between input and button */
+        .control-compact {
+            min-height: 46px;
+            padding: 10px 14px;
+            font-size: 16px;
+        }
+
+        /* Extra small button variant for resource links */
+        .btn-xs {
+            padding: 4px 10px !important;
+            font-size: 12px !important;
+            border-radius: 999px !important;
+        }
+
+        /* Important card styles (monochrome, attention) */
+        .important-card {
+            position: relative;
+            background: rgba(244, 63, 94, 0.06); /* softer red tint */
+            border-color: rgba(244, 63, 94, 0.35) !important; /* softer red border */
+        }
+        .important-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 16px;
+            pointer-events: none;
+            box-shadow: 0 0 0 1px rgba(244,63,94,0.2), 0 8px 20px rgba(0,0,0,0.5);
+        }
+
+        /* Colorful emphasis for Important card */
+        .important-card h4 {
+            background: linear-gradient(90deg, #fecaca, #fb7185, #f43f5e);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 900;
+            margin-bottom: 10px;
+        }
+        .important-card ul { list-style: none; padding: 0; margin: 8px 0 0; }
+        .important-card ul li {
+            position: relative;
+            padding-inline-start: 1.35rem; /* a bit more space for bullets */
+            margin: 8px 0;
+            color: #e9e9e9;
+        }
+        .important-card ul li::before {
+            content: '';
+            position: absolute;
+            inset-inline-start: 0;
+            top: 0.85em;
+            width: 9px; height: 9px; border-radius: 50%;
+            background: #f87171; /* default red */
+        }
+        .important-card ul li:nth-child(1)::before { background: #fca5a5; }
+        .important-card ul li:nth-child(2)::before { background: #fb7185; }
+        .important-card ul li:nth-child(3)::before { background: #f43f5e; }
+
+        .form-select:focus {
+            outline: none;
+            border-color: rgba(255,255,255,0.6);
+            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.18);
+            transform: none;
+        }
+
+        .form-text { color: var(--muted); font-size: 13px; margin-top: 8px; }
+
+        .btn-primary {
+            background: rgba(255,255,255,0.12);
+            color: #ffffff;
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 12px;
+            padding: 14px 20px;
+            font-size: 16px;
+            font-weight: 800;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
+            transition: transform 0.08s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            background: rgba(255,255,255,0.16);
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.45);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+            background: rgba(255,255,255,0.10);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn-outline-info {
+            display: inline-block;
+            border: 1px solid rgba(255,255,255,0.3);
+            color: #ffffff;
+            background: rgba(255,255,255,0.06);
+            border-radius: 999px;
+            padding: 8px 18px;
+            font-size: 14px;
+            text-decoration: none;
+            box-shadow: none;
+            transition: border-color 0.2s ease, color 0.2s ease, transform 0.1s ease;
+        }
+
+        .btn-outline-info:hover { transform: translateY(-1px); }
+
+        .info-section h4 { color: #ffffff; font-weight: 800; }
+        .info-section p { color: #d2d8e0; line-height: 1.9; }
+
+        /* Force monochrome accents */
+        .carrier, .apn, .proxy, .dns { color: #ffffff !important; }
+
+        /* QR styles */
+        #qr-card h4 { margin-bottom: 12px; }
+        #qrcode { display: inline-block; padding: 12px; background: #ffffff; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.35); }
+        #qrcode canvas { display: block; border-radius: 8px; }
+
+        .w-100 { width: 100%; }
+        .mb-4 { margin-bottom: 1.25rem; }
+
+        @media only screen and (max-width: 600px) {
+            body { padding: 24px 0; }
+            h1 { font-size: 22px; }
+        }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap"
+        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body dir="rtl">
+    <div class="container" style="text-align: center;">
+        <h1>سازنده پروفایل تنظیمات iOS</h1>
+
+        <div class="main-card">
+            <form id="config-form">
+                <div class="mb-4" id="uuid-section">
+                    <label for="user-uuid" class="apn">ساخت UUID (نسخه ۴):</label>
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <input id="user-uuid" type="text" dir="ltr" inputmode="latin" placeholder="xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx" class="form-select control-compact" style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace; flex:1;" />
+                        <button type="button" id="btn-generate-uuid" class="btn btn-outline-info control-compact" aria-label="Generate UUID">ساخت</button>
+                    </div>
+                    <div id="uuid-status" class="form-text" aria-live="polite">برای ادامه، یک UUID بساز.</div>
+                    <div class="form-text" style="margin-top:6px;">
+                        اگر مشکلی در ساخت پیش آمد، می‌توانید از این منابع یک UUID نسخه ۴ بسازید و در فیلد بالا وارد کنید:
+                        <br>
+                        <a href="https://www.uuidtools.com/v4" target="_blank" rel="noopener noreferrer" class="btn-outline-info btn-xs" style="margin:6px 4px 0; display:inline-block;">uuidtools.com/v4</a>
+                        <a href="https://www.uuidgenerator.net/version4" target="_blank" rel="noopener noreferrer" class="btn-outline-info btn-xs" style="margin:6px 4px 0; display:inline-block;">uuidgenerator.net/v4</a>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label for="apn" class="apn">انتخاب اپراتور:</label>
+                    <select id="apn" class="form-select" disabled>
+                        <option value="mcinet">ایرانسل</option>
+                        <option value="mtnirancell">همراه اول</option>
+                        <option value="RighTel">رایتل</option>
+                        <option value="ApTel">آپتل</option>
+                        <option value="samantel">سامانتل</option>
+                        <option value="shatelmobile">شاتل موبایل</option>
+                    </select>
+                    <div class="form-text">اپراتور مورد نظر خود را انتخاب کنید</div>
+                </div>
+                <button type="submit" id="btn-submit" class="btn btn-primary w-100" disabled>ساخت پروفایل تنظیمات</button>
+            </form>
+        </div>
+
+        <div class="info-card info-section important-card" role="alert" style="margin-top:20px; text-align:right;">
+            <h4>مهم</h4>
+            <p class="form-text" style="color:#ffffff; margin-bottom:8px;">
+                بعد از دانلود، <strong>حتماً</strong> باید این کار را انجام بده:
+            </p>
+            <ul>
+                <li>روی فایل <strong>نگه‌دار</strong> یا راست‌کلیک کن و <strong>Rename</strong> را بزن.</li>
+                <li>انتهای نام فایل این پسوند را اضافه کن: <strong>.mobileconfig</strong></li>
+                <li>تأیید کن. حالا با باز کردن فایل، نصب پروفایل شروع می‌شود.</li>
+            </ul>
+        </div>
+
+        <div class="info-card info-section" id="qr-card" style="margin-top:20px; text-align:center;">
+            <h4>ورود سریع با QR</h4>
+            <p class="form-text">این کد را اسکن کنید تا مستقیم وارد همین صفحه شوید.</p>
+            <div id="qrcode" aria-label="QR code to open this page"></div>
+        </div>
+    </div>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        const configForm = document.getElementById('config-form');
+        const apnSelect = document.getElementById('apn');
+        const submitBtn = document.getElementById('btn-submit');
+        const userUuidInput = document.getElementById('user-uuid');
+        const generateUuidBtn = document.getElementById('btn-generate-uuid');
+        const uuidStatus = document.getElementById('uuid-status');
+
+        const UUID_V4_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+        function generateUniqueUUID() {
+            // Prefer secure, RFC 4122 version 4 UUID using crypto.getRandomValues
+            if (typeof window !== 'undefined' && window.crypto && typeof window.crypto.getRandomValues === 'function') {
+                const bytes = new Uint8Array(16);
+                window.crypto.getRandomValues(bytes);
+                // Per RFC 4122: set version to 4 (0100) and variant to 10xx
+                bytes[6] = (bytes[6] & 0x0f) | 0x40;
+                bytes[8] = (bytes[8] & 0x3f) | 0x80;
+                const hex = Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
+                return (
+                    hex.slice(0, 8) + '-' +
+                    hex.slice(8, 12) + '-' +
+                    hex.slice(12, 16) + '-' +
+                    hex.slice(16, 20) + '-' +
+                    hex.slice(20)
+                );
+            }
+            // Fallback (non-cryptographic)
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                const r = Math.random() * 16 | 0;
+                const v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        function setUuidValidityState(isValid) {
+            if (isValid) {
+                uuidStatus.textContent = 'UUID معتبر است؛ حالا اپراتور را انتخاب کن.';
+                uuidStatus.style.color = '#d1fae5'; // soft green
+                apnSelect.disabled = false;
+                submitBtn.disabled = false;
+            } else {
+                uuidStatus.textContent = 'UUID نامعتبر است. روی «ساخت» بزن یا یک UUID نسخه ۴ معتبر وارد کن.';
+                uuidStatus.style.color = '#fca5a5'; // soft red
+                apnSelect.disabled = true;
+                submitBtn.disabled = true;
+            }
+        }
+
+        function validateUuidInput() {
+            const value = (userUuidInput.value || '').trim();
+            const isValid = UUID_V4_REGEX.test(value);
+            setUuidValidityState(isValid);
+            return isValid;
+        }
+
+        // Generate button handler
+        if (generateUuidBtn) {
+            generateUuidBtn.addEventListener('click', () => {
+                const newId = generateUniqueUUID();
+                userUuidInput.value = newId;
+                validateUuidInput();
+            });
+        }
+
+        // Live validation as user types/pastes
+        if (userUuidInput) {
+            userUuidInput.addEventListener('input', validateUuidInput);
+        }
+
+        // Initialize state on load
+        setUuidValidityState(false);
+
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            // Ensure UUID is valid before proceeding
+            if (!validateUuidInput()) {
+                userUuidInput.focus();
+                return;
+            }
+            const rootUUID = userUuidInput.value.trim();
+            const apn = document.getElementById('apn').value;
+
+            const configPlist = `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>PayloadContent</key>
+    <array>
+        <!-- Cellular Settings -->
+        <dict>
+            <key>PayloadDisplayName</key>
+            <string>Cellular</string>
+            <key>PayloadIdentifier</key>
+            <string>com.apple.cellular</string>
+            <key>PayloadType</key>
+            <string>com.apple.cellular</string>
+            <key>PayloadUUID</key>
+            <string>${generateUniqueUUID()}</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>APNs</key>
+            <array>
+                <!-- First APN -->
+                <dict>
+                    <key>AllowedProtocolMask</key>
+                    <integer>3</integer>
+                    <key>AllowedProtocolMaskInDomesticRoaming</key>
+                    <integer>3</integer>
+                    <key>AllowedProtocolMaskInRoaming</key>
+                    <integer>3</integer>
+                    <key>AuthenticationType</key>
+                    <string>PAP</string>
+                    <key>DefaultProtocolMask</key>
+                    <integer>3</integer>
+                    <key>EnableXLAT464</key>
+                    <true />
+                    <key>Name</key>
+                    <string>${apn}</string>
+                    <key>ProxyServer</key>
+                    <string></string>
+                    <key>Username</key>
+                    <string></string>
+                </dict>
+                <!-- Second APN -->
+                <dict>
+                    <key>AllowedProtocolMask</key>
+                    <integer>1</integer>
+                    <key>AllowedProtocolMaskInDomesticRoaming</key>
+                    <integer>1</integer>
+                    <key>AllowedProtocolMaskInRoaming</key>
+                    <integer>1</integer>
+                    <key>AuthenticationType</key>
+                    <string>CHAP</string>
+                    <key>DefaultProtocolMask</key>
+                    <integer>1</integer>
+                    <key>EnableXLAT464</key>
+                    <true />
+                    <key>Name</key>
+                    <string>${apn}</string>
+                    <key>Username</key>
+                    <string></string>
+                </dict>
+            </array>
+            <key>AttachAPN</key>
+            <dict>
+                <key>AllowedProtocolMask</key>
+                <integer>3</integer>
+                <key>AuthenticationType</key>
+                <string>PAP</string>
+                <key>Name</key>
+                <string>${apn}</string>
+                <key>Username</key>
+                <string></string>
+            </dict>
+        </dict>
+
+        <!-- VPN Settings -->
+        <dict>
+            <key>PayloadDisplayName</key>
+            <string>VPN</string>
+            <key>PayloadIdentifier</key>
+            <string>com.apple.vpn.managed.${generateUniqueUUID()}</string>
+            <key>PayloadType</key>
+            <string>com.apple.vpn.managed</string>
+            <key>PayloadUUID</key>
+            <string>${generateUniqueUUID()}</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>UserDefinedName</key>
+            <string>VPN Configuration</string>
+            <key>VPNType</key>
+            <string>IPSec</string>
+            <key>IPSec</key>
+            <dict>
+                <key>AuthenticationMethod</key>
+                <string>SharedSecret</string>
+                <key>ExtendedAuthEnabled</key>
+                <false/>
+                <key>LocalIdentifier</key>
+                <string>${apn}</string>
+                <key>RemoteAddress</key>
+                <string>vpn.example.com</string>
+                <key>SharedSecret</key>
+                <string>${generateUniqueUUID()}</string>
+                <key>XAuthEnabled</key>
+                <false/>
+                <key>XAuthName</key>
+                <string>${apn}</string>
+                <key>XAuthPassword</key>
+                <string>${apn}</string>
+            </dict>
+        </dict>
+
+        <!-- Proxy Settings -->
+        <dict>
+            <key>PayloadDisplayName</key>
+            <string>Proxy</string>
+            <key>PayloadIdentifier</key>
+            <string>com.apple.proxy.${generateUniqueUUID()}</string>
+            <key>PayloadType</key>
+            <string>com.apple.proxy</string>
+            <key>PayloadUUID</key>
+            <string>${generateUniqueUUID()}</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>HTTPEnable</key>
+            <false/>
+            <key>HTTPPort</key>
+            <integer>8080</integer>
+            <key>HTTPSEnable</key>
+            <false/>
+            <key>HTTPSPort</key>
+            <integer>8080</integer>
+            <key>FTPEnable</key>
+            <false/>
+            <key>FTPPort</key>
+            <integer>21</integer>
+            <key>SOCKSEnable</key>
+            <false/>
+            <key>SOCKSPort</key>
+            <integer>1080</integer>
+            <key>Server</key>
+            <string></string>
+            <key>ExclusionList</key>
+            <array>
+                <string>localhost</string>
+                <string>127.0.0.1</string>
+                <string>169.254.0.0/16</string>
+            </array>
+        </dict>
+
+        <!-- Additional Settings -->
+        <dict>
+            <key>PayloadDisplayName</key>
+            <string>Additional Settings</string>
+            <key>PayloadIdentifier</key>
+            <string>com.example.additionalsettings.${generateUniqueUUID()}</string>
+            <key>PayloadType</key>
+            <string>Configuration</string>
+            <key>PayloadUUID</key>
+            <string>${generateUniqueUUID()}</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>PayloadOrganization</key>
+            <string>Github:AiGptCode</string>
+            <key>PayloadRemovalDisallowed</key>
+            <false/>
+            <key>SignalBoostEnabled</key>
+            <true/>
+        </dict>
+    </array>
+    <key>PayloadDisplayName</key>
+    <string>Configuration Profile</string>
+    <key>PayloadIdentifier</key>
+    <string>com.example.profile</string>
+    <key>PayloadRemovalDisallowed</key>
+    <false/>
+    <key>PayloadType</key>
+    <string>Configuration</string>
+    <key>PayloadUUID</key>
+    <string>${rootUUID}</string>
+    <key>PayloadVersion</key>
+    <integer>1</integer>
+</dict>
+</plist>
+`;
+
+            const configBlob = new Blob([configPlist], { type: 'application/xml' });
+            const downloadLink = document.createElement('a');
+            downloadLink.href = URL.createObjectURL(configBlob);
+            downloadLink.download = 'config.mobileconfig';
+            downloadLink.click();
+            setTimeout(() => {
+                URL.revokeObjectURL(downloadLink.href);
+            }, 1000);
+        }
+
+        configForm.addEventListener('submit', handleFormSubmit);
+
+        // Generate monochrome (black/white) QR for the current page URL
+        (function generatePageQR() {
+            const el = document.getElementById('qrcode');
+            if (!el || typeof QRCode === 'undefined') return;
+            const url = window.location.href.split('#')[0];
+            // Clear if re-render
+            el.innerHTML = '';
+            new QRCode(el, {
+                text: url,
+                width: 196,
+                height: 196,
+                colorDark: '#000000',
+                colorLight: '#ffffff',
+                correctLevel: QRCode.CorrectLevel.M
+            });
+        })();
+    </script>
+
+</body>
+
+</html>
