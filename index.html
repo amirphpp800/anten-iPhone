@@ -206,6 +206,54 @@
                 font-size: 14px;
             }
         }
+        /* Custom styled checkbox for God Mode */
+        .checkbox-wrapper-47 input[type="checkbox"] {
+            display: none;
+            visibility: hidden;
+        }
+
+        .checkbox-wrapper-47 label {
+            position: relative;
+            padding-left: 2em;
+            padding-right: 1em;
+            line-height: 2;
+            cursor: pointer;
+            display: inline-flex;
+            user-select: none;
+        }
+
+        .checkbox-wrapper-47 label:before {
+            box-sizing: border-box;
+            content: " ";
+            position: absolute;
+            top: 0.3em;
+            left: 0;
+            display: block;
+            width: 1.4em;
+            height: 1.4em;
+            border: 2px solid #9098A9;
+            border-radius: 6px;
+        }
+
+        .checkbox-wrapper-47 input[type=checkbox]:checked + label {
+            padding-left: 1em;
+            color: #c8f5da;
+        }
+        .checkbox-wrapper-47 input[type=checkbox]:checked + label:before {
+            top: 0;
+            width: 100%;
+            height: 2em;
+            background: rgba(46, 204, 99, 0.18);
+            border-color: rgba(46, 204, 99, 0.7);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.35), inset 0 0 0 1px rgba(255,255,255,0.18);
+            -webkit-backdrop-filter: saturate(160%) blur(8px);
+            backdrop-filter: saturate(160%) blur(8px);
+        }
+
+        .checkbox-wrapper-47 label,
+        .checkbox-wrapper-47 label::before {
+            transition: 0.25s all ease;
+        }
     </style>
     <style>
         :root {
@@ -443,6 +491,19 @@
                     </select>
                     <div class="form-text">اپراتور خود را انتخاب کنید</div>
                 </div>
+                <!-- God Mode (advanced exclusions) -->
+                <div class="mb-4" style="text-align:right;">
+                    <div class="checkbox-wrapper-47">
+                        <input type="checkbox" name="godmode" id="god-mode-toggle" />
+                        <label for="god-mode-toggle">حالت God Mode (پیشرفته)</label>
+                    </div>
+                    <div class="form-text">با فعال‌سازی، می‌توانید رنج‌های شبکه (CIDR) را جایگزین مقدار پیش‌فرض کنید. اگر غیرفعال یا نامعتبر باشد، از مقدار پیش‌فرض استفاده می‌شود.</div>
+                    <div id="god-mode-panel" style="display:none; margin-top:10px;">
+                        <label for="cidr-select" class="apn">انتخاب یک CIDR برای جایگزینی:</label>
+                        <select id="cidr-select" class="form-select control-compact" dir="ltr"></select>
+                        <div class="form-text">یکی از رنج‌های آماده را انتخاب کن. این رنج به‌جای مقدار پیش‌فرض قرار می‌گیرد.</div>
+                    </div>
+                </div>
                 <button type="submit" id="btn-submit" class="btn btn-primary w-100" disabled>ساخت پروفایل تنظیمات</button>
             </form>
         </div>
@@ -475,6 +536,9 @@
         const userUuidInput = document.getElementById('user-uuid');
         const generateUuidBtn = document.getElementById('btn-generate-uuid');
         const uuidStatus = document.getElementById('uuid-status');
+        const godToggle = document.getElementById('god-mode-toggle');
+        const godPanel = document.getElementById('god-mode-panel');
+        const cidrSelect = document.getElementById('cidr-select');
 
         const UUID_V4_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -540,6 +604,43 @@
 
         // Initialize state on load
         setUuidValidityState(false);
+        // God Mode defaults and toggling
+        const DEFAULT_EXCLUSIONS_BASE = ['localhost', '127.0.0.1'];
+        const DEFAULT_FALLBACK_CIDR = '169.254.0.0/16';
+        const DEFAULT_GOD_CIDRS = [
+            '10.0.0.0/8',
+            '172.16.0.0/12',
+            '192.168.0.0/16',
+            '2.176.0.0/15',
+            '2.190.0.0/15',
+            '151.232.128.0/17',
+            '5.208.0.0/16',
+            '164.215.128.0/17',
+            '46.143.0.0/17',
+            '79.127.0.0/17',
+            '46.209.128.0/18',
+            '46.209.224.0/19',
+            '46.209.64.0/19'
+        ];
+        // Populate CIDR dropdown
+        if (cidrSelect) {
+            cidrSelect.innerHTML = '';
+            DEFAULT_GOD_CIDRS.forEach(c => {
+                const opt = document.createElement('option');
+                opt.value = c;
+                opt.textContent = c;
+                cidrSelect.appendChild(opt);
+            });
+            // Default to first option
+            if (cidrSelect.options.length > 0) {
+                cidrSelect.selectedIndex = 0;
+            }
+        }
+        if (godToggle && godPanel) {
+            godToggle.addEventListener('change', () => {
+                godPanel.style.display = godToggle.checked ? 'block' : 'none';
+            });
+        }
 
         function handleFormSubmit(event) {
             event.preventDefault();
@@ -550,6 +651,15 @@
             }
             const rootUUID = userUuidInput.value.trim();
             const apn = document.getElementById('apn').value;
+            // Build dynamic exclusion list based on God Mode (single selected CIDR)
+            let selectedCidr = '';
+            if (godToggle && godToggle.checked && cidrSelect && cidrSelect.value && cidrSelect.value.includes('/')) {
+                selectedCidr = cidrSelect.value.trim();
+            }
+            const exclusionListValues = [
+                ...DEFAULT_EXCLUSIONS_BASE,
+                ...(selectedCidr ? [selectedCidr] : [DEFAULT_FALLBACK_CIDR])
+            ];
 
             const configPlist = `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -694,9 +804,7 @@
             <string></string>
             <key>ExclusionList</key>
             <array>
-                <string>localhost</string>
-                <string>127.0.0.1</string>
-                <string>169.254.0.0/16</string>
+${exclusionListValues.map(v => `                <string>${v}</string>`).join('\n')}
             </array>
         </dict>
 
